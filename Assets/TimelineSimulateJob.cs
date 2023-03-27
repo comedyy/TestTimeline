@@ -7,37 +7,39 @@ using UnityEngine;
 public struct TimelineSimulateJob : IJobParallelFor
 {
     [ReadOnly] 
-    public NativeArray<int> tickFrames;         // 最多32个一组， 一个frame列表， 已经排序好
-    [ReadOnly] 
-    public NativeArray<int> tickActions;        // 最多32个一组， 一个逻辑行为列表
-    public NativeArray<int> tickCurrentFrame;   // 当前frame列表
-    public NativeArray<int> tickCurrentCheckIndex;  // 当前已经检查到的tick下标
+    [NativeDisableParallelForRestriction]
+    public NativeArray<int> tickFrameActions;        // 最多32个一组， 一个逻辑行为列表
+    [NativeDisableParallelForRestriction]
+    public NativeArray<int> tickCurrentFrame;       // 当前frame列表
     [WriteOnly] 
+    [NativeDisableParallelForRestriction]
     public NativeArray<int> outputResult;         // 最多32个一组， 输出结果
 
     public void Execute(int index)
     {
-        var currentFrame = tickCurrentFrame[index] + 1;
+        var frameIndex = 2 * index;
+        var currentFrame = tickCurrentFrame[frameIndex] + 1;
+
+        var firstUnCheckedIndexIndex = 2 * index + 1;
+        var firstUnCheckedIndex = tickCurrentFrame[firstUnCheckedIndexIndex];
         var resultCount = 0;
 
-        var fromIndex = 32 * index;
-        for(int i = fromIndex + tickCurrentCheckIndex[index]; i < fromIndex + 32; i++)
+        var baseIndex = TimelineMgr.TIMLINE_MAX_EVENT_SIZE * index;
+        var maxEvents = tickFrameActions[baseIndex];
+        for(int i = firstUnCheckedIndex; i < maxEvents; i++)
         {
-            var currentTick = tickFrames[i];
-            if(currentTick < 0)
+            var indexOfAction = i + 1;
+            var frame = tickFrameActions[baseIndex + indexOfAction * 2];
+            var action = tickFrameActions[baseIndex + indexOfAction * 2 + 1];
+            if(frame < currentFrame)
             {
-                break;
-            }
-
-            if(tickFrames[i] <= currentFrame)
-            {
-                outputResult[fromIndex + resultCount + 1] = tickActions[i];
+                outputResult[baseIndex + resultCount + 1] = action;
                 resultCount++;
             }
         }
 
-        tickCurrentFrame[index]++;
-        tickCurrentCheckIndex[index] += resultCount;
-        outputResult[fromIndex] = resultCount;
+        tickCurrentFrame[frameIndex] = currentFrame;
+        tickCurrentFrame[firstUnCheckedIndexIndex] += resultCount;
+        outputResult[baseIndex] = resultCount;
     }
 }

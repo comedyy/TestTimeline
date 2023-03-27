@@ -46,7 +46,7 @@ public class RawTimelineData : ScriptableObject
     public Clip[] runTimeclips;
 
     [NonSerialized]
-    public KeyValuePair<int, int>[] frameEvent;
+    public KeyValuePair<int, int>[] frameAction;
 
     static List<KeyValuePair<int, int>>  s_tempList = new List<KeyValuePair<int, int>>();
     public void OnLoad()
@@ -58,15 +58,15 @@ public class RawTimelineData : ScriptableObject
         for(int i = 0; i < runTimeclips.Length; i++)
         {
             var clip = runTimeclips[i];
-            s_tempList.Add(new KeyValuePair<int, int>(clip.from, i * 10));
+            s_tempList.Add(new KeyValuePair<int, int>(clip.from, i * 10 + 1));
 
             if(clip.from != clip.to)
             {
-                s_tempList.Add(new KeyValuePair<int, int>(clip.to, i * 10 + 1));
+                s_tempList.Add(new KeyValuePair<int, int>(clip.to, i * 10 + 2));
             }
         }
 
         s_tempList.Sort((m,n)=>m.Key - n.Key);
-        frameEvent = s_tempList.ToArray();
+        frameAction = s_tempList.ToArray();
     }
 }

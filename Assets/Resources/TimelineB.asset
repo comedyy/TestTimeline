@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 242f3914002feec4abc9293123c5790e, type: 3}
-  m_Name: RawTimelineData
+  m_Name: TimelineB
   m_EditorClassIdentifier: 
   tracks:
   - clips:
@@ -19,27 +19,13 @@ MonoBehaviour:
       asset:
         id: 0
     - from: 2
-      to: 3
+      to: 2
       asset:
         id: 1
     - from: 4
-      to: 8
+      to: 4
       asset:
         id: 2
-  - clips:
-    - from: 2
-      to: 2
-      asset:
-        id: 3
-    - from: 3
-      to: 5
-      asset:
-        id: 4
-  - clips:
-    - from: 0
-      to: 9
-      asset:
-        id: 5
   references:
     version: 1
     00000000:
@@ -47,22 +33,10 @@ MonoBehaviour:
       data:
         log: log0_0
     00000001:
-      type: {class: TimelineVfxClipAsset, ns: , asm: Assembly-CSharp}
-      data:
-        vfx: vfx0_1
-    00000002:
-      type: {class: TimelineVfxClipAsset, ns: , asm: Assembly-CSharp}
-      data:
-        vfx: vfx0_2
-    00000003:
       type: {class: TimelineLogClipAsset, ns: , asm: Assembly-CSharp}
       data:
-        log: log1_1
-    00000004:
-      type: {class: TimelineVfxClipAsset, ns: , asm: Assembly-CSharp}
+        log: bbbb
+    00000002:
+      type: {class: TimelineLogClipAsset, ns: , asm: Assembly-CSharp}
       data:
-        vfx: vfx1_1
-    00000005:
-      type: {class: TimelineVfxClipAsset, ns: , asm: Assembly-CSharp}
-      data:
-        vfx: vfx2_0
+        log: aaaaa

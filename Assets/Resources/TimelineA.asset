@@ -1,0 +1,68 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 242f3914002feec4abc9293123c5790e, type: 3}
+  m_Name: TimelineA
+  m_EditorClassIdentifier: 
+  tracks:
+  - clips:
+    - from: 1
+      to: 1
+      asset:
+        id: 0
+    - from: 2
+      to: 3
+      asset:
+        id: 1
+    - from: 4
+      to: 8
+      asset:
+        id: 2
+  - clips:
+    - from: 2
+      to: 2
+      asset:
+        id: 3
+    - from: 3
+      to: 5
+      asset:
+        id: 4
+  - clips:
+    - from: 0
+      to: 9
+      asset:
+        id: 5
+  references:
+    version: 1
+    00000000:
+      type: {class: TimelineLogClipAsset, ns: , asm: Assembly-CSharp}
+      data:
+        log: log0_0
+    00000001:
+      type: {class: TimelineVfxClipAsset, ns: , asm: Assembly-CSharp}
+      data:
+        vfx: vfx0_1
+    00000002:
+      type: {class: TimelineVfxClipAsset, ns: , asm: Assembly-CSharp}
+      data:
+        vfx: vfx0_2
+    00000003:
+      type: {class: TimelineLogClipAsset, ns: , asm: Assembly-CSharp}
+      data:
+        log: log1_1
+    00000004:
+      type: {class: TimelineVfxClipAsset, ns: , asm: Assembly-CSharp}
+      data:
+        vfx: vfx1_1
+    00000005:
+      type: {class: TimelineVfxClipAsset, ns: , asm: Assembly-CSharp}
+      data:
+        vfx: vfx2_0

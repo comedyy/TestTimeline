@@ -21,6 +21,11 @@ public class NewBehaviourScript : MonoBehaviour
 
         _timelineMgr = new TimelineMgr();
         _timelineMgr.Init();
+
+        for(int i = 0; i < TimelineMgr.MAX_TIMELINE_COUNT; i++)
+        {
+            _timelineMgr.AddTimeline(timelineDataTemplateA, null);
+        }
     }
 
     // Update is called once per frame

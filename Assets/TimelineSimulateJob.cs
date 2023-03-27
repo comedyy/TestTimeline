@@ -14,32 +14,31 @@ public struct TimelineSimulateJob : IJobParallelFor
     [WriteOnly] 
     [NativeDisableParallelForRestriction]
     public NativeArray<int> outputResult;         // 最多32个一组， 输出结果
+    internal NativeArray<int> tickFrameCount;
+    internal NativeArray<int> tickCurrentCheck;
+    internal NativeArray<int> outputResultCount;
 
     public void Execute(int index)
     {
-        var frameIndex = 2 * index;
-        var currentFrame = tickCurrentFrame[frameIndex] + 1;
-
-        var firstUnCheckedIndexIndex = 2 * index + 1;
-        var firstUnCheckedIndex = tickCurrentFrame[firstUnCheckedIndexIndex];
+        var currentFrame = tickCurrentFrame[index] + 1;
+        var firstUnCheckedIndex = tickCurrentCheck[index];
         var resultCount = 0;
 
         var baseIndex = TimelineMgr.TIMLINE_MAX_EVENT_SIZE * index;
-        var maxEvents = tickFrameActions[baseIndex];
+        var maxEvents = tickFrameCount[index];
         for(int i = firstUnCheckedIndex; i < maxEvents; i++)
         {
-            var indexOfAction = i + 1;
-            var frame = tickFrameActions[baseIndex + indexOfAction * 2];
-            var action = tickFrameActions[baseIndex + indexOfAction * 2 + 1];
+            var frame = tickFrameActions[baseIndex + i * 2];
+            var action = tickFrameActions[baseIndex + i * 2 + 1];
             if(frame < currentFrame)
             {
-                outputResult[baseIndex + resultCount + 1] = action;
+                outputResult[baseIndex + resultCount] = action;
                 resultCount++;
             }
         }
+        outputResultCount[index] = resultCount;
 
-        tickCurrentFrame[frameIndex] = currentFrame;
-        tickCurrentFrame[firstUnCheckedIndexIndex] += resultCount;
-        outputResult[baseIndex] = resultCount;
+        tickCurrentFrame[index] = currentFrame;
+        tickCurrentCheck[index] += resultCount;
     }
 }

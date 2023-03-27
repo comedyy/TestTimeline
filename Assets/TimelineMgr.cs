@@ -21,33 +21,50 @@ public class TimelineMgr
     Timeline[] _allTimes;
     int currentTimelineCount;
 
+    // 配置数据
+    public NativeArray<int> tickFrameCount;
     public NativeArray<int> tickFrameActions;        // 对应RawTimelineData的FrameAction
+
+    // 运行数据
     public NativeArray<int> tickCurrentFrame;   // 当前（frame，已经检查到的下标）
+    public NativeArray<int> tickCurrentCheck;   // 当前（frame，已经检查到的下标）
+
+    // 输出数据
     public NativeArray<int> outputResult;         //  输出结果
+    public NativeArray<int> outputResultCount;         //  输出结果
 
     public void Init()
     {
         _allTimes = new Timeline[MAX_TIMELINE_COUNT];
         tickFrameActions = new NativeArray<int>(MAX_TIMELINE_COUNT * TIMLINE_MAX_EVENT_SIZE * 2, Allocator.Persistent);
-        tickCurrentFrame = new NativeArray<int>(MAX_TIMELINE_COUNT * 2, Allocator.Persistent);
+        tickFrameCount = new NativeArray<int>(MAX_TIMELINE_COUNT, Allocator.Persistent);
+        tickCurrentFrame = new NativeArray<int>(MAX_TIMELINE_COUNT, Allocator.Persistent);
+        tickCurrentCheck = new NativeArray<int>(MAX_TIMELINE_COUNT, Allocator.Persistent);
         outputResult = new NativeArray<int>(MAX_TIMELINE_COUNT * TIMLINE_MAX_EVENT_SIZE, Allocator.Persistent);
+        outputResultCount = new NativeArray<int>(MAX_TIMELINE_COUNT, Allocator.Persistent);
     }
 
     public void CleanUp()
     {
         tickFrameActions.Dispose();
         tickCurrentFrame.Dispose();
+        tickCurrentCheck.Dispose();
+        tickFrameCount.Dispose();
         outputResult.Dispose();
+        outputResultCount.Dispose();
     }
 
     internal void Update()
     {
         // Job for simulate
-        ClearArray(outputResult, MAX_TIMELINE_COUNT);
+        // ClearArray(outputResult, MAX_TIMELINE_COUNT);
         TimelineSimulateJob job = new TimelineSimulateJob(){
             tickFrameActions = tickFrameActions,
+            tickFrameCount = tickFrameCount,
             tickCurrentFrame = tickCurrentFrame,
+            tickCurrentCheck = tickCurrentCheck,
             outputResult = outputResult,
+            outputResultCount = outputResultCount
         };
 
         var handle = job.Schedule(currentTimelineCount, 8);
@@ -60,20 +77,21 @@ public class TimelineMgr
             if(timeline.isEnd) continue;
 
             var baseIndex = i * TIMLINE_MAX_EVENT_SIZE;
-            var resultCount = outputResult[baseIndex];
+            var resultCount = outputResultCount[i];
 
             if(resultCount == 0) continue;
 
             for(int j = 0; j < resultCount; j++)
             {
-                var evIndex = outputResult[baseIndex + j + 1];
+                var evIndex = outputResult[baseIndex + j];
                 var clipIndex = evIndex / 10;
                 var evFuncIndex = evIndex % 10;
+
                 var clip = timeline.asset.runTimeclips[clipIndex];
                 Excute(timeline, clip.asset, evFuncIndex);
             }
 
-            if(tickCurrentFrame[2 * i + 1] >= timeline.asset.frameAction.Length)
+            if(tickCurrentCheck[i] >= timeline.asset.frameAction.Length)
             {
                 timeline.isEnd = true;
             }
@@ -90,7 +108,8 @@ public class TimelineMgr
                     _allTimes[i] = _allTimes[currentTimelineCount - 1];
 
                     NativeArray<int>.Copy(tickFrameActions, fromIndex * TIMLINE_MAX_EVENT_SIZE, tickFrameActions, i * TIMLINE_MAX_EVENT_SIZE, TIMLINE_MAX_EVENT_SIZE);
-                    NativeArray<int>.Copy(tickCurrentFrame, fromIndex * 2, tickFrameActions, i * 2, 2);
+                    tickFrameActions[i] = tickCurrentFrame[currentTimelineCount - 1];
+                    tickCurrentCheck[i] = tickCurrentCheck[currentTimelineCount - 1];
                 }
                 currentTimelineCount--;
                 Debug.Log("i End");
@@ -125,21 +144,23 @@ public class TimelineMgr
     {
         if(currentTimelineCount == MAX_TIMELINE_COUNT) throw new Exception("TOO MUSH TIMELINE");
 
+        // mono
         var timeline = new Timeline(){
             asset = asset,
             context = context
         };
         _allTimes[currentTimelineCount] = timeline;
 
+        // native
         var baseIndex = currentTimelineCount * TIMLINE_MAX_EVENT_SIZE;
-        for(int i = 0; i < asset.frameAction.Length; i++)
+        for(int index = 0; index < asset.frameAction.Length; index++)
         {
-            var index = i + 1;
-            tickFrameActions[baseIndex + index * 2] = asset.frameAction[i].Key;
-            tickFrameActions[baseIndex + index * 2 + 1] = asset.frameAction[i].Value;
+            tickFrameActions[baseIndex + index * 2] = asset.frameAction[index].Key;
+            tickFrameActions[baseIndex + index * 2 + 1] = asset.frameAction[index].Value;
         }
 
-        tickFrameActions[baseIndex] = asset.frameAction.Length;
+        tickFrameCount[currentTimelineCount] = asset.frameAction.Length;
+        tickCurrentCheck[currentTimelineCount] = tickCurrentFrame[currentTimelineCount] = 0;
 
         currentTimelineCount++;
 
